@@ -4,24 +4,71 @@ A WordPress port of the Tresio CMS cookie consent widget. The banner, storage ke
 
 ## Installing on a site
 
-Build the zip with `bin/zip.sh cookie-consent` from the repo root, then:
+Download `s3-cookie-consent.zip` from the [latest release](https://github.com/tresio/wp-cookie-consent/releases/latest), then:
 
 1. Test on staging first if the site has one.
-2. Plugins → Add New → Upload Plugin, upload `dist/s3-cookie-consent.zip`, activate. Nothing changes until consent is ticked.
+2. Plugins → Add New → Upload Plugin, upload the zip, activate. Nothing changes until consent is ticked.
 3. Settings → Cookie Consent:
    - Paste the GA, WhatConverts and Meta Pixel IDs. Tick Essential for Google and WhatConverts if they should load before a choice, and Consent Mode if Google should load cookieless.
-   - Add each tracking snippet under Scripts with its location. Tick Essential for anything that must load before a choice.
+   - Move the site's other tracking snippets into Scripts (see [Moving scripts from Header Footer Code Manager](#moving-scripts-from-header-footer-code-manager)).
    - Check the policy legal name, address and phone.
    - Tick Consent and save.
-4. Turn off the old copies: deactivate the moved snippets in Header Footer Code Manager, and any plugin that adds the same tags (Site Kit, GTM4WP). Otherwise they load twice, and ungated.
+4. Turn off the old copies: the moved HFCM snippets, and any plugin that adds the same tags (Site Kit, GTM4WP). Otherwise they load twice, and ungated.
 5. Check the Cookie Policy page. Saving with Consent on creates and publishes `/cookie-policy/` (see below).
 6. Add a "Cookie Settings" link: a menu item with the URL `#cookie-settings`, or `[s3_cookie_settings]` in a footer block or widget.
-7. Purge the page cache (WP Rocket, LiteSpeed, host cache, Cloudflare).
-8. In a private window, run through the test checklist below.
-
-Updating: upload the new zip the same way and choose "Replace current with uploaded". Settings are kept. Deleting the plugin from the Plugins screen removes its settings.
+7. If the site runs NitroPack, add the exclusions in [NitroPack](#nitropack).
+8. Purge the page cache (NitroPack, WP Rocket, LiteSpeed, host cache, Cloudflare).
+9. In a private window, run through the test checklist below.
 
 The banner title, banner content, category descriptions and policy text all ship with default wording, so a site works without editing them.
+
+## Updates
+
+After the first install, the plugin updates itself from this repository's GitHub Releases. New versions show on the Plugins screen like any other plugin update; click **update now**, or use **Enable auto-updates** in the Plugins screen's right-hand column for unattended updates.
+
+- Sites check at most every 12 hours. **Dashboard → Updates → Check Again** checks straight away.
+- A failed check (GitHub unreachable or rate-limited) waits an hour before trying again.
+- Settings are kept across updates. Deleting the plugin from the Plugins screen removes its settings.
+- Sites on 0.2.0 or earlier have no updater: upload 0.3.0 or later by hand once (Upload Plugin → Replace current with uploaded).
+
+## Moving scripts from Header Footer Code Manager
+
+Stop using HFCM for tracking tags on consent sites; HFCM prints its snippets without asking for consent. For each active HFCM snippet:
+
+1. In Settings → Cookie Consent → Scripts, click **Add script**, paste the snippet's code, and give it the same name.
+2. Set the location: HFCM **Header** → Head, **Footer** → Footer. Body open is for snippets that must sit right after `<body>` (for example a GTM `<noscript>` iframe).
+3. Tick **Essential** only if it must run before a choice (site functionality, not analytics or ads). Leave it unticked to hold it until Accept All.
+4. Leave **Active** unticked for now and save.
+5. In HFCM, deactivate the original snippet.
+6. Back in Scripts, tick **Active** and save. The tag is never loaded twice or missing.
+
+GA, WhatConverts and Meta Pixel snippets don't need a script: paste their IDs into the built-in fields instead. HFCM snippets limited to certain pages or devices load on every page once moved; check that is acceptable. When nothing is left in HFCM, deactivate it.
+
+## NitroPack
+
+NitroPack can delay or combine inline scripts until the visitor interacts with the page. If it does that to this plugin's scripts, essential tags load late and the banner may not appear until the visitor scrolls or clicks. In the NitroPack dashboard, under **Excluded Resources**, add exclusions for code containing:
+
+- `s3CookieConsentConfig` (the consent setup in `<head>`)
+- `s3ConsentCustomScripts.register` (held scripts)
+- `partial_cookie_consent` (the banner script)
+
+Purge NitroPack's cache after any change to the cookie consent settings. NitroPack's page cache itself is fine: the plugin serves the same HTML to every visitor.
+
+## Releasing
+
+The version lives in the plugin header, the `S3CC_VERSION` constant and `CHANGELOG.md`. Write notes under `## [Unreleased]` as you go, then:
+
+```bash
+bin/bump.sh patch --tag
+```
+
+```bash
+git push origin main --follow-tags
+```
+
+`bin/bump.sh` takes `patch`, `minor`, `major` or an exact version, and `--dry-run` shows what it would change. Pushing the tag runs the Release workflow: it checks the versions match the tag, lints, builds `s3-cookie-consent.zip` and publishes a GitHub Release with the zip attached. Sites pick it up within 12 hours. Tags with a hyphen (`v1.0.0-beta.1`) are published as prereleases, which sites are never offered.
+
+To build the zip locally: `bin/build.sh`.
 
 ## How it works
 
@@ -85,5 +132,5 @@ Use a private window. Check `localStorage` and the Network tab.
 7. Timestamp older than 30 days, or invalid JSON in the key: key removed, banner returns.
 8. Consent Mode: `dataLayer` starts with consent default; hits carry `gcs=G100` before Accept and `gcs=G111` after.
 9. Consent off: no banner, all tags and scripts load directly.
-10. Caching or optimisation plugin active (WP Rocket, LiteSpeed, Autoptimize): the head bootstrap still runs before gtag.
+10. Caching or optimisation plugin active (NitroPack, WP Rocket, LiteSpeed, Autoptimize): the banner shows without scrolling or clicking, and the head bootstrap still runs before gtag.
 11. Styling: check the banner, the Manage Preferences panel and `/cookie-policy/` against the theme. Themes can change paragraph spacing, link colours and font weights; fix those in the site's Additional CSS.

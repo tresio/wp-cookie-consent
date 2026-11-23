@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint / PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+      - name: Lint every PHP file
+        run: find . -name '*.php' -print0 | xargs -0 -n1 -P4 php -l
+
+  package:
+    name: Version and zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Header and constant agree
+        run: bash bin/version.sh check
+      - name: Build
+        run: bash bin/build.sh
+      - name: Zip has one correctly named folder and no dev files
+        run: |
+          ROOTS=$(unzip -Z1 dist/s3-cookie-consent.zip | cut -d/ -f1 | sort -u)
+          [ "$ROOTS" = "s3-cookie-consent" ] || { echo "::error::Unexpected layout: $ROOTS"; exit 1; }
+          if unzip -Z1 dist/s3-cookie-consent.zip | grep -qE '\.github/|bin/|CHANGELOG|README'; then
+            echo "::error::Development files leaked into the zip"; exit 1
+          fi
