@@ -7,7 +7,6 @@ defined( 'ABSPATH' ) || exit;
 class S3CC_Settings {
 
 	const OPTION           = 's3_cookie_consent';
-	const GA_MODES         = array( 'essential', 'optional', 'cookieless' );
 	const SCRIPT_LOCATIONS = array( 'head', 'body', 'footer' );
 
 	const DEFAULT_PREFERENCES = array(
@@ -32,7 +31,8 @@ class S3CC_Settings {
 			'pref_nonessential_label' => '',
 			'pref_nonessential_desc'  => '',
 			'ga_ids'                  => '',
-			'ga_mode'                 => 'essential',
+			'ga_essential'            => true,
+			'ga_cookieless'           => false,
 			'ga_gateway_path'         => '',
 			'wc_id'                   => '',
 			'wc_v2'                   => false,
@@ -52,9 +52,6 @@ class S3CC_Settings {
 		$saved = get_option( self::OPTION, array() );
 		$s     = array_merge( self::defaults(), is_array( $saved ) ? $saved : array() );
 
-		if ( ! in_array( $s['ga_mode'], self::GA_MODES, true ) ) {
-			$s['ga_mode'] = 'essential';
-		}
 		$s['scripts'] = self::normalize_scripts( $s['scripts'] );
 
 		return $s;
@@ -124,6 +121,16 @@ class S3CC_Settings {
 		return '';
 	}
 
+	/**
+	 * essential, optional (blocked until Accept) or cookieless (Consent Mode), as in the CMS.
+	 */
+	public static function ga_mode( $s ) {
+		if ( $s['ga_essential'] ) {
+			return 'essential';
+		}
+		return $s['ga_cookieless'] ? 'cookieless' : 'optional';
+	}
+
 	public static function split_ids( $value ) {
 		return array_values( array_filter( array_map( 'trim', explode( ',', (string) $value ) ), 'strlen' ) );
 	}
@@ -147,7 +154,7 @@ class S3CC_Settings {
 			'enabled'   => (bool) $s['enabled'],
 			'ga'        => array(
 				'ids'         => self::split_ids( $s['ga_ids'] ),
-				'mode'        => $s['ga_mode'],
+				'mode'        => self::ga_mode( $s ),
 				'live'        => $live,
 				'gatewayPath' => $live ? $s['ga_gateway_path'] : '',
 			),

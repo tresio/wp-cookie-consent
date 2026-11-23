@@ -9,7 +9,7 @@ Build the zip with `bin/zip.sh cookie-consent` from the repo root, then:
 1. Test on staging first if the site has one.
 2. Plugins → Add New → Upload Plugin, upload `dist/s3-cookie-consent.zip`, activate. Nothing changes until consent is ticked.
 3. Settings → Cookie Consent:
-   - Paste the GA, WhatConverts and Meta Pixel IDs. Pick the Google mode and whether WhatConverts is essential.
+   - Paste the GA, WhatConverts and Meta Pixel IDs. Tick Essential for Google and WhatConverts if they should load before a choice, and Consent Mode if Google should load cookieless.
    - Add each tracking snippet under Scripts with its location. Tick Essential for anything that must load before a choice.
    - Check the policy legal name, address and phone.
    - Tick Consent and save.
@@ -37,11 +37,11 @@ The banner title, banner content, category descriptions and policy text all ship
 | Consent | Master switch. Off: no banner, and everything loads directly. |
 | Title, Content | Banner heading and body (HTML). |
 | Manage Preferences | Adds the preferences panel. Still a single yes/no choice. |
-| Google tag IDs | Comma-separated GA4 / Ads IDs. Loads only when `wp_get_environment_type()` is `production`, or with `?loadTags=1`. |
-| Google mode | Essential (loads with cookies), Optional (blocked until Accept), or Consent Mode (loads denied, granted on Accept). |
-| Google tag gateway path | First-party gtag path, with a fallback to googletagmanager.com. |
-| WhatConverts ID, v2, Essential | WhatConverts call tracking. |
+| Google tag IDs, Essential | Comma-separated GA4 / Ads IDs. Essential loads them before any choice, with cookies (CMS `essentialScripts` with `'ga'`). Loads only when `wp_get_environment_type()` is `production`, or with `?loadTags=1`. |
+| WhatConverts ID, v2, Essential | WhatConverts call tracking. v2 is WhatConverts' newer script domain (CMS `whatconverts.v2`). Essential is CMS `'wc'`. |
 | Meta Pixel IDs | Always non-essential. |
+| Google Consent Mode | Only when Google is not essential. Off: Google is blocked until Accept. On: Google loads cookieless before a choice and is upgraded on Accept (CMS `google.cookieless`). |
+| Google tag gateway path | First-party gtag path, with a fallback to googletagmanager.com. |
 | Scripts | Named code snippets, each with a location (head, body open, footer), an Essential flag and an Active flag. Editing code needs the `unfiltered_html` capability. |
 | Cookie policy fields | Values for `[s3_cookie_policy]`. A blank legal name uses the Yoast or Rank Math organisation name, then the Site Title. |
 
@@ -71,7 +71,6 @@ The first time an admin loads WP admin with Consent on, the plugin creates a pub
 - The banner script is inline in the footer, not part of a theme bundle, so it can't be missing.
 - The banner has `role="dialog"`, an accessible name, and closes on Escape.
 - `localStorage` access is wrapped in try/catch.
-- The Tresio tracking bundle is not built in. Add it as a script if a site needs it.
 
 ## Test checklist
 

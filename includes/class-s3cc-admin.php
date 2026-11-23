@@ -70,7 +70,8 @@ class S3CC_Admin {
 			'pref_nonessential_label' => $text( 'pref_nonessential_label' ),
 			'pref_nonessential_desc'  => $html( 'pref_nonessential_desc' ),
 			'ga_ids'                  => implode( ', ', S3CC_Settings::split_ids( $text( 'ga_ids' ) ) ),
-			'ga_mode'                 => in_array( $text( 'ga_mode' ), S3CC_Settings::GA_MODES, true ) ? $text( 'ga_mode' ) : 'essential',
+			'ga_essential'            => ! empty( $in['ga_essential'] ),
+			'ga_cookieless'           => ! empty( $in['ga_cookieless'] ),
 			'ga_gateway_path'         => $text( 'ga_gateway_path' ),
 			'wc_id'                   => preg_replace( '/[^A-Za-z0-9_-]/', '', $text( 'wc_id' ) ),
 			'wc_v2'                   => ! empty( $in['wc_v2'] ),
@@ -289,31 +290,10 @@ class S3CC_Admin {
 						'Google tag IDs',
 						function () use ( $s ) {
 							self::text( 'ga_ids', $s['ga_ids'], 'G-XXXXXXX, AW-XXXXXXX' );
+							echo '<br>';
+							self::checkbox( 'ga_essential', $s['ga_essential'], 'Essential (loads before any choice)' );
 						},
-						'Comma-separated. The first ID loads gtag.js. Only loads in production (<code>WP_ENVIRONMENT_TYPE</code>) or with <code>?loadTags=1</code>.'
-					);
-					self::row(
-						'Google mode',
-						function () use ( $s ) {
-							$modes = array(
-								'essential'  => 'Essential: loads before any choice, with cookies',
-								'optional'   => 'Optional: blocked until Accept All',
-								'cookieless' => 'Consent Mode: loads denied (cookieless), upgraded on Accept All',
-							);
-							echo '<select name="' . esc_attr( self::name( 'ga_mode' ) ) . '">';
-							foreach ( $modes as $value => $label ) {
-								echo '<option value="' . esc_attr( $value ) . '" ' . selected( $s['ga_mode'], $value, false ) . '>' . esc_html( $label ) . '</option>';
-							}
-							echo '</select>';
-						},
-						'UK/EU sites: use Optional or Consent Mode.'
-					);
-					self::row(
-						'Google tag gateway path',
-						function () use ( $s ) {
-							self::text( 'ga_gateway_path', $s['ga_gateway_path'], '/metrics' );
-						},
-						'Optional first-party path. Falls back to googletagmanager.com if it fails to load.'
+						'Comma-separated. The first ID loads gtag.js. Only loads in production (<code>WP_ENVIRONMENT_TYPE</code>) or with <code>?loadTags=1</code>. UK/EU sites: untick Essential.'
 					);
 					self::row(
 						'WhatConverts ID',
@@ -331,6 +311,20 @@ class S3CC_Admin {
 							self::text( 'meta_pixel_ids', $s['meta_pixel_ids'] );
 						},
 						'Comma-separated. Always non-essential.'
+					);
+					self::row(
+						'Google Consent Mode',
+						function () use ( $s ) {
+							self::checkbox( 'ga_cookieless', $s['ga_cookieless'], 'Use Consent Mode' );
+						},
+						'Only applies when Google is not essential. Off: Google is blocked until Accept All. On: Google loads cookieless before a choice and is upgraded on Accept All.'
+					);
+					self::row(
+						'Google tag gateway path',
+						function () use ( $s ) {
+							self::text( 'ga_gateway_path', $s['ga_gateway_path'], '/metrics' );
+						},
+						'Optional first-party path. Falls back to googletagmanager.com if it fails to load.'
 					);
 					?>
 				</table>
