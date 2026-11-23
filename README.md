@@ -8,6 +8,7 @@ Download `s3-cookie-consent.zip` from the [latest release](https://github.com/tr
 
 1. Test on staging first if the site has one.
 2. Plugins → Add New → Upload Plugin, upload the zip, activate. Nothing changes until consent is ticked.
+   On the Plugins screen, click **Enable auto-updates** in the plugin's row (right-hand column) so new releases install themselves (see [Updates](#updates)).
 3. Settings → Cookie Consent:
    - Paste the GA, WhatConverts and Meta Pixel IDs. Tick Essential for Google and WhatConverts if they should load before a choice, and Consent Mode if Google should load cookieless.
    - Move the site's other tracking snippets into Scripts (see [Moving scripts from Header Footer Code Manager](#moving-scripts-from-header-footer-code-manager)).
@@ -24,9 +25,11 @@ The banner title, banner content, category descriptions and policy text all ship
 
 ## Updates
 
-After the first install, the plugin updates itself from this repository's GitHub Releases. New versions show on the Plugins screen like any other plugin update; click **update now**, or use **Enable auto-updates** in the Plugins screen's right-hand column for unattended updates.
+The plugin updates from this repository's GitHub Releases. Only a pushed version tag publishes a release (see [Releasing](#releasing)); ordinary pushes to `main` never reach sites.
 
-- Sites check at most every 12 hours. **Dashboard → Updates → Check Again** checks straight away.
+- **Auto-updates on** (recommended, set during install): WordPress installs new releases in the background on its twice-daily update run. Nobody needs to click anything.
+- **Auto-updates off** (WordPress's default): the Plugins screen shows "There is a new version of S3 Cookie Consent available" with an **update now** link, and someone has to click it.
+- Sites check GitHub at most every 12 hours, so a release reaches a site within about a day. **Dashboard → Updates → Check Again** checks straight away.
 - A failed check (GitHub unreachable or rate-limited) waits an hour before trying again.
 - Settings are kept across updates. Deleting the plugin from the Plugins screen removes its settings.
 - Sites on 0.2.0 or earlier have no updater: upload 0.3.0 or later by hand once (Upload Plugin → Replace current with uploaded).

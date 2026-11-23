@@ -6,6 +6,12 @@ All notable changes to this plugin are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- README: turn on auto-updates during install, and how updates behave with
+  auto-updates on or off. No code changes; this release also checks that
+  updates reach installed sites.
+
 ## [0.3.0]
 
 ### Added
