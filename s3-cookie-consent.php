@@ -3,7 +3,7 @@
  * Plugin Name:       S3 Cookie Consent
  * Plugin URI:        https://github.com/tresio/wp-cookie-consent
  * Description:       Cookie consent banner and script gating, ported from the Tresio CMS consent widget.
- * Version:           0.3.0
+ * Version:           0.3.1
  * Requires at least: 5.2
  * Requires PHP:      7.4
  * Author:            Studio 3 Marketing
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'S3CC_VERSION', '0.3.0' );
+define( 'S3CC_VERSION', '0.3.1' );
 define( 'S3CC_FILE', __FILE__ );
 define( 'S3CC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'S3CC_URL', plugin_dir_url( __FILE__ ) );

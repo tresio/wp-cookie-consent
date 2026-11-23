@@ -6,6 +6,8 @@ All notable changes to this plugin are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.1]
+
 ### Changed
 
 - README: turn on auto-updates during install, and how updates behave with
