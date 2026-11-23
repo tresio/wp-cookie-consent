@@ -2,6 +2,27 @@
 
 A WordPress port of the Tresio CMS cookie consent widget. The banner, storage key, JavaScript globals and data attributes match the CMS, so QA checks and GTM setups carry over.
 
+## Installing on a site
+
+Build the zip with `bin/zip.sh cookie-consent` from the repo root, then:
+
+1. Test on staging first if the site has one.
+2. Plugins → Add New → Upload Plugin, upload `dist/s3-cookie-consent.zip`, activate. Nothing changes until consent is ticked.
+3. Settings → Cookie Consent:
+   - Paste the GA, WhatConverts and Meta Pixel IDs. Pick the Google mode and whether WhatConverts is essential.
+   - Add each tracking snippet under Scripts with its location. Tick Essential for anything that must load before a choice.
+   - Check the policy legal name, address and phone.
+   - Tick Consent and save.
+4. Turn off the old copies: deactivate the moved snippets in Header Footer Code Manager, and any plugin that adds the same tags (Site Kit, GTM4WP). Otherwise they load twice, and ungated.
+5. Create a page with the slug `cookie-policy` containing `[s3_cookie_policy]`, and set it to noindex in the SEO plugin.
+6. Add a "Cookie Settings" link: a menu item with the URL `#cookie-settings`, or `[s3_cookie_settings]` in a footer block or widget.
+7. Purge the page cache (WP Rocket, LiteSpeed, host cache, Cloudflare).
+8. In a private window, run through the test checklist below.
+
+Updating: upload the new zip the same way and choose "Replace current with uploaded". Settings are kept. Deleting the plugin from the Plugins screen removes its settings.
+
+The banner title, banner content, category descriptions and policy text all ship with default wording, so a site works without editing them.
+
 ## How it works
 
 - The visitor's choice is stored in `localStorage._s3CookieConsent` as `{"type": "all" | "essential", "timestamp": ms}`. It expires after 30 days.
@@ -22,7 +43,7 @@ A WordPress port of the Tresio CMS cookie consent widget. The banner, storage ke
 | WhatConverts ID, v2, Essential | WhatConverts call tracking. |
 | Meta Pixel IDs | Always non-essential. |
 | Scripts | Named code snippets, each with a location (head, body open, footer), an Essential flag and an Active flag. Editing code needs the `unfiltered_html` capability. |
-| Cookie policy fields | Values for `[s3_cookie_policy]`. |
+| Cookie policy fields | Values for `[s3_cookie_policy]`. A blank legal name uses the Yoast or Rank Math organisation name, then the Site Title. |
 
 Inside a non-essential snippet, top-level `<script type="application/ld+json">` blocks and elements with `data-s3-consent="essential"` still load before any choice.
 

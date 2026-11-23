@@ -334,8 +334,9 @@ class S3CC_Admin {
 					self::row(
 						'Legal name',
 						function () use ( $s ) {
-							self::text( 'policy_legal_name', $s['policy_legal_name'], get_bloginfo( 'name' ) );
-						}
+							self::text( 'policy_legal_name', $s['policy_legal_name'], S3CC_Settings::seo_org_name() ?: get_bloginfo( 'name' ) );
+						},
+						'Blank uses the organisation name from Yoast or Rank Math, then the Site Title. The placeholder shows what the policy will use.'
 					);
 					self::row(
 						'Privacy policy URL',

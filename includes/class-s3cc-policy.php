@@ -18,7 +18,7 @@ class S3CC_Policy {
 
 	public static function policy() {
 		$s       = S3CC_Settings::get();
-		$name    = $s['policy_legal_name'] ? $s['policy_legal_name'] : get_bloginfo( 'name' );
+		$name    = S3CC_Settings::legal_name( $s );
 		$privacy = $s['policy_privacy_url'] ? $s['policy_privacy_url'] : home_url( '/privacy-policy/' );
 		ob_start();
 		include S3CC_DIR . 'templates/policy.php';

@@ -24,8 +24,8 @@ class S3CC_Settings {
 	public static function defaults() {
 		return array(
 			'enabled'                 => false,
-			'title'                   => '',
-			'content'                 => '',
+			'title'                   => 'Your Privacy Choices',
+			'content'                 => '<p>We use essential cookies to make this website work. With your permission, we would also like to use non-essential cookies to understand how you use our website and to measure our advertising. You can accept or reject non-essential cookies, and change your choice at any time using "Cookie Settings" in the website footer. For more information, see our <a href="/cookie-policy/">Cookie Policy</a>.</p>',
 			'preferences'             => false,
 			'pref_essential_label'    => '',
 			'pref_essential_desc'     => '',
@@ -100,6 +100,28 @@ class S3CC_Settings {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Legal name setting, then the Yoast or Rank Math organisation name, then the Site Title.
+	 */
+	public static function legal_name( $s ) {
+		if ( '' !== $s['policy_legal_name'] ) {
+			return $s['policy_legal_name'];
+		}
+		return self::seo_org_name() ?: get_bloginfo( 'name' );
+	}
+
+	public static function seo_org_name() {
+		$yoast = get_option( 'wpseo_titles' );
+		if ( is_array( $yoast ) && ! empty( $yoast['company_name'] ) ) {
+			return trim( (string) $yoast['company_name'] );
+		}
+		$rank_math = get_option( 'rank-math-options-titles' );
+		if ( is_array( $rank_math ) && ! empty( $rank_math['knowledgegraph_name'] ) ) {
+			return trim( (string) $rank_math['knowledgegraph_name'] );
+		}
+		return '';
 	}
 
 	public static function split_ids( $value ) {
