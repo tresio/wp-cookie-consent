@@ -176,6 +176,34 @@ class S3CC_Admin {
 		<?php
 	}
 
+	private static function policy_page_status( $s ) {
+		$id   = S3CC_Policy::page_id();
+		$page = $id ? get_post( $id ) : null;
+
+		if ( $page && 'trash' !== $page->post_status ) {
+			if ( 'publish' === $page->post_status ) {
+				$status = 'Published';
+			} elseif ( get_post_meta( $page->ID, S3CC_Policy::META_DRAFTED, true ) ) {
+				$status = 'Draft (Consent is off; it is republished when you turn Consent back on)';
+			} else {
+				$status = ucfirst( $page->post_status ) . ' (not live)';
+			}
+			printf(
+				'<p class="description">Policy page: <strong>%s</strong> · %s · <a href="%s" target="_blank">View</a> · <a href="%s">Edit</a>. It is noindexed and left out of the sitemap. Link to it from the footer.</p>',
+				esc_html( get_the_title( $page ) ),
+				esc_html( $status ),
+				esc_url( get_permalink( $page ) ),
+				esc_url( get_edit_post_link( $page ) )
+			);
+			return;
+		}
+		if ( false !== get_option( S3CC_Policy::PAGE_OPTION, false ) ) {
+			echo '<p class="description"><strong>The policy page was deleted.</strong> To restore it, create a page with the slug <code>cookie-policy</code> containing <code>[s3_cookie_policy]</code>.</p>';
+			return;
+		}
+		echo '<p class="description">A published <code>/cookie-policy/</code> page is created when you turn on Consent and save. If that page already exists, it is used as is.</p>';
+	}
+
 	public static function render() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -328,7 +356,7 @@ class S3CC_Admin {
 				<?php endif; ?>
 
 				<h2>Cookie policy page</h2>
-				<p class="description">Put <code>[s3_cookie_policy]</code> on a page with the slug <code>cookie-policy</code>. Set it to noindex in your SEO plugin.</p>
+				<?php self::policy_page_status( $s ); ?>
 				<table class="form-table" role="presentation">
 					<?php
 					self::row(

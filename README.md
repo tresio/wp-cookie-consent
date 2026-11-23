@@ -14,7 +14,7 @@ Build the zip with `bin/zip.sh cookie-consent` from the repo root, then:
    - Check the policy legal name, address and phone.
    - Tick Consent and save.
 4. Turn off the old copies: deactivate the moved snippets in Header Footer Code Manager, and any plugin that adds the same tags (Site Kit, GTM4WP). Otherwise they load twice, and ungated.
-5. Create a page with the slug `cookie-policy` containing `[s3_cookie_policy]`, and set it to noindex in the SEO plugin.
+5. Check the Cookie Policy page. Saving with Consent on creates and publishes `/cookie-policy/` (see below).
 6. Add a "Cookie Settings" link: a menu item with the URL `#cookie-settings`, or `[s3_cookie_settings]` in a footer block or widget.
 7. Purge the page cache (WP Rocket, LiteSpeed, host cache, Cloudflare).
 8. In a private window, run through the test checklist below.
@@ -47,9 +47,19 @@ The banner title, banner content, category descriptions and policy text all ship
 
 Inside a non-essential snippet, top-level `<script type="application/ld+json">` blocks and elements with `data-s3-consent="essential"` still load before any choice.
 
+## Cookie policy page
+
+The first time an admin loads WP admin with Consent on, the plugin creates a published page titled "Cookie Policy" at `/cookie-policy/` containing `[s3_cookie_policy]`.
+
+- If a page with that slug already exists, it is used as is, with its content untouched.
+- The page is noindexed (core `wp_robots`, plus Yoast and Rank Math post meta) and left out of the core sitemap.
+- This happens once. If someone deletes the page, it is not recreated; the settings page says so.
+- Turning Consent off sets the page the plugin created to draft, because its text describes a banner that is no longer there. Turning Consent back on republishes it, but only if the plugin drafted it. Edits to the page are kept. An existing page the plugin adopted is never drafted or published automatically.
+- It is not added to any menu. Link to it from the footer.
+
 ## Shortcodes and links
 
-- `[s3_cookie_policy]`: the cookie policy text. Put it on a page with the slug `cookie-policy` and set that page to noindex.
+- `[s3_cookie_policy]`: the cookie policy text. The page above already contains it.
 - `[s3_cookie_settings text="Cookie Settings"]`: a link that reopens the banner.
 - Any link to `#cookie-settings` (for example a custom menu item) also reopens the banner.
 - `window.s3CookieConsent.openSettings()` does the same from JavaScript.
