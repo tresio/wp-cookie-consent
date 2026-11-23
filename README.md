@@ -86,3 +86,4 @@ Use a private window. Check `localStorage` and the Network tab.
 8. Consent Mode: `dataLayer` starts with consent default; hits carry `gcs=G100` before Accept and `gcs=G111` after.
 9. Consent off: no banner, all tags and scripts load directly.
 10. Caching or optimisation plugin active (WP Rocket, LiteSpeed, Autoptimize): the head bootstrap still runs before gtag.
+11. Styling: check the banner, the Manage Preferences panel and `/cookie-policy/` against the theme. Themes can change paragraph spacing, link colours and font weights; fix those in the site's Additional CSS.
